@@ -1,15 +1,15 @@
-FROM node:18
+FROM node:18-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci
+RUN npm ci --omit=dev
 
 COPY . .
 
 RUN npm run build
 
-EXPOSE 3001
+EXPOSE 3000
 
-CMD ["npm", "run", "start:prod"] 
+CMD ["node", "dist/main"]
