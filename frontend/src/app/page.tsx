@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Comment, api, canRestoreComment } from '@/lib/api';
+import { formatDistanceToNow } from 'date-fns';
 
 export default function HomePage() {
   const { user, logout, loading, socket } = useAuth();
@@ -97,141 +98,133 @@ export default function HomePage() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
-  };
-
   const renderComment = (comment: Comment, depth = 0) => (
-    <div key={comment.id} className={`border-l-2 border-gray-200 pl-4 ${depth > 0 ? 'ml-4' : ''}`}>
-      <div className="bg-white p-4 rounded-lg shadow mb-4">
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="font-semibold text-gray-900">{comment.username}</div>
-            <div className="text-sm text-gray-500">{formatDate(comment.createdAt)}</div>
-            {/* Debug info */}
-            <div className="text-xs text-gray-400">
-              isDeleted: {comment.isDeleted ? 'true' : 'false'} | 
-              deletedAt: {comment.deletedAt || 'null'} | 
-              userId: {comment.userId} | 
-              currentUser: {user?.id}
-            </div>
-          </div>
-          {user && comment.userId === user.id && (
-            <div className="flex space-x-2">
-              {comment.canEdit && !comment.isDeleted && (
-                <button 
-                  onClick={() => {
-                    setEditingComment(comment.id);
-                    setEditContent(comment.content);
-                  }}
-                  className="text-blue-600 hover:text-blue-800 text-sm"
-                >
-                  Edit
-                </button>
-              )}
-              {!comment.isDeleted ? (
-                <button
-                  onClick={() => handleDeleteComment(comment.id)}
-                  className="text-red-600 hover:text-red-800 text-sm"
-                >
-                  Delete
-                </button>
-              ) : canRestoreComment(comment) && (
-                <button
-                  onClick={() => handleRestoreComment(comment.id)}
-                  className="text-green-600 hover:text-green-800 text-sm"
-                >
-                  Restore
-                </button>
-              )}
-            </div>
-          )}
+    <div
+      key={comment.id}
+      className={`relative ${depth > 0 ? 'ml-8' : ''} mt-2`}
+    >
+      {depth > 0 && (
+        <span className="absolute left-0 top-6 w-4 h-full border-l-2 border-indigo-100" />
+      )}
+      <div className={`flex items-start space-x-3 bg-white rounded-xl shadow-sm p-4 mb-2 transition hover:shadow-md ${comment.isDeleted ? 'opacity-60' : ''}`}
+        style={{ borderLeft: depth > 0 ? '4px solid #6366f1' : undefined }}
+      >
+        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-200 flex items-center justify-center font-bold text-indigo-700 text-lg">
+          {comment.username?.[0]?.toUpperCase() || '?'}
         </div>
-        
-        {!comment.isDeleted ? (
-          <div className="mt-2 text-gray-700">{comment.content}</div>
-        ) : canRestoreComment(comment) ? (
-          <div className="mt-2 text-gray-400 italic">[Comment deleted]</div>
-        ) : null}
-
-        {!comment.isDeleted && user && (
-          <div className="mt-3">
-            <button
-              onClick={() => setReplyingTo(comment.id)}
-              className="text-blue-600 hover:text-blue-800 text-sm"
-            >
-              Reply
-            </button>
+        <div className="flex-1">
+          <div className="flex items-center space-x-2">
+            <span className="font-semibold text-gray-900">{comment.username}</span>
+            <span className="text-xs text-gray-400">{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</span>
+            {comment.isDeleted && <span className="ml-2 text-xs text-red-400">[Deleted]</span>}
           </div>
-        )}
-
-        {replyingTo === comment.id && (
-          <form onSubmit={handleSubmitReply} className="mt-3">
-            <textarea
-              value={replyContent}
-              onChange={(e) => setReplyContent(e.target.value)}
-              placeholder="Write your reply..."
-              className="w-full p-2 border border-gray-300 rounded-md"
-              rows={3}
-            />
-            <div className="mt-2 flex space-x-2">
+          {!comment.isDeleted ? (
+            <div className="mt-1 text-gray-800 text-base">{comment.content}</div>
+          ) : canRestoreComment(comment) ? (
+            <div className="mt-1 text-gray-400 italic">[Comment deleted]</div>
+          ) : null}
+          <div className="flex items-center space-x-2 mt-2">
+            {!comment.isDeleted && user && (
               <button
-                type="submit"
-                className="px-3 py-1 bg-blue-600 text-white rounded text-sm"
+                onClick={() => setReplyingTo(comment.id)}
+                className="text-indigo-600 hover:text-indigo-800 text-xs font-medium px-2 py-1 rounded transition"
               >
                 Reply
               </button>
+            )}
+            {user && comment.userId === user.id && !comment.isDeleted && comment.canEdit && (
               <button
-                type="button"
                 onClick={() => {
-                  setReplyingTo(null);
-                  setReplyContent('');
+                  setEditingComment(comment.id);
+                  setEditContent(comment.content);
                 }}
-                className="px-3 py-1 bg-gray-300 text-gray-700 rounded text-sm"
+                className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 rounded transition"
               >
-                Cancel
+                Edit
               </button>
-            </div>
-          </form>
-        )}
-
-        {editingComment === comment.id && (
-          <form onSubmit={(e) => { e.preventDefault(); handleEditComment(comment.id); }} className="mt-3">
-            <textarea
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-              placeholder="Edit your comment..."
-              className="w-full p-2 border border-gray-300 rounded-md"
-              rows={3}
-            />
-            <div className="mt-2 flex space-x-2">
+            )}
+            {user && comment.userId === user.id && !comment.isDeleted && (
               <button
-                type="submit"
-                className="px-3 py-1 bg-blue-600 text-white rounded text-sm"
+                onClick={() => handleDeleteComment(comment.id)}
+                className="text-red-600 hover:text-red-800 text-xs font-medium px-2 py-1 rounded transition"
               >
-                Save
+                Delete
               </button>
+            )}
+            {user && comment.userId === user.id && comment.isDeleted && canRestoreComment(comment) && (
               <button
-                type="button"
-                onClick={() => {
-                  setEditingComment(null);
-                  setEditContent('');
-                }}
-                className="px-3 py-1 bg-gray-300 text-gray-700 rounded text-sm"
+                onClick={() => handleRestoreComment(comment.id)}
+                className="text-green-600 hover:text-green-800 text-xs font-medium px-2 py-1 rounded transition"
               >
-                Cancel
+                Restore
               </button>
-            </div>
-          </form>
-        )}
-
-        {comment.replies && comment.replies.length > 0 && (
-          <div className="mt-4">
-            {comment.replies
-              .filter(reply => !reply.isDeleted || canRestoreComment(reply))
-              .map(reply => renderComment(reply, depth + 1))}
+            )}
           </div>
-        )}
+          {replyingTo === comment.id && (
+            <form onSubmit={handleSubmitReply} className="mt-3">
+              <textarea
+                value={replyContent}
+                onChange={(e) => setReplyContent(e.target.value)}
+                placeholder="Write your reply..."
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition"
+                rows={3}
+              />
+              <div className="mt-2 flex space-x-2">
+                <button
+                  type="submit"
+                  className="px-3 py-1 bg-indigo-600 text-white rounded text-sm font-medium hover:bg-indigo-700 transition"
+                >
+                  Reply
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReplyingTo(null);
+                    setReplyContent('');
+                  }}
+                  className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm font-medium hover:bg-gray-300 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+          {editingComment === comment.id && (
+            <form onSubmit={(e) => { e.preventDefault(); handleEditComment(comment.id); }} className="mt-3">
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                placeholder="Edit your comment..."
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+                rows={3}
+              />
+              <div className="mt-2 flex space-x-2">
+                <button
+                  type="submit"
+                  className="px-3 py-1 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700 transition"
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingComment(null);
+                    setEditContent('');
+                  }}
+                  className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm font-medium hover:bg-gray-300 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+          {/* Render replies recursively */}
+          {comment.replies && comment.replies.length > 0 && (
+            <div className="mt-2">
+              {comment.replies.map(reply => renderComment(reply, depth + 1))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

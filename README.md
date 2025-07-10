@@ -10,6 +10,7 @@ A minimalistic and highly scalable comment application built with NestJS (backen
 - ✅ **Edit Window** - Comments can be edited only within 15 minutes of posting
 - ✅ **Soft Delete with Restore** - Users can delete comments and restore them within a 15-minute grace period
 - ✅ **Notification System** - Alerts users when they receive replies with read/unread toggle
+- ✅ **Real-Time Updates** - Comments, replies, and notifications update instantly for all users (socket.io powered)
 
 ### Technical Features
 - ✅ **TypeScript** - Full TypeScript implementation
@@ -32,6 +33,7 @@ A minimalistic and highly scalable comment application built with NestJS (backen
 - **Styling**: Tailwind CSS
 - **State Management**: React Context API
 - **Language**: TypeScript
+- **Real-Time**: socket.io-client
 
 ### Infrastructure
 - **Containerization**: Docker + Docker Compose
@@ -81,8 +83,8 @@ Sanctity/
    ```
 
 3. **Access the application**
-   - Frontend: http://localhost:3001
-   - Backend API: http://localhost:3000
+   - Frontend: http://localhost:3001 (or http://YOUR_EC2_IP:3001 in production)
+   - Backend API: http://localhost:3000 (or http://YOUR_EC2_IP:3000 in production)
    - Database: localhost:5432
 
 ### Local Development
@@ -106,6 +108,15 @@ npm run dev
 # Using Docker for PostgreSQL
 docker run --name sanctity-db -e POSTGRES_USER=sanctity -e POSTGRES_PASSWORD=sanctity -e POSTGRES_DB=sanctity -p 5432:5432 -d postgres:15
 ```
+
+## Real-Time Features
+
+- The app uses **socket.io** for real-time notifications and comment updates.
+- When a comment or reply is posted, all users see it instantly—no refresh needed.
+- Notifications for replies are delivered in real time.
+- **Production Note:**
+  - In `frontend/src/contexts/AuthContext.tsx`, update the socket.io URL to your EC2 IP (e.g., `http://YOUR_EC2_IP:3000`).
+  - Make sure port 3000 is open in your EC2 security group.
 
 ## API Endpoints
 
@@ -187,6 +198,7 @@ docker run --name sanctity-db -e POSTGRES_USER=sanctity -e POSTGRES_PASSWORD=san
 - Client-side state management
 - Efficient re-rendering with React
 - Minimal API calls with proper caching
+- Real-time updates for comments and notifications
 
 ### Docker Benefits
 - Consistent environment across development/production
@@ -208,6 +220,8 @@ JWT_SECRET=your-super-secret-jwt-key-change-in-production
 
 # Frontend
 NEXT_PUBLIC_API_URL=http://localhost:3000
+# In production, use your EC2 IP:
+# NEXT_PUBLIC_API_URL=http://YOUR_EC2_IP:3000
 ```
 
 ### Database Migrations
@@ -223,11 +237,12 @@ TypeOrmModule.forRoot({
 
 ## Testing the Application
 
-1. **Register a new user** at http://localhost:3001/register
+1. **Register a new user** at http://localhost:3001/register (or http://YOUR_EC2_IP:3001/register)
 2. **Login** and start creating comments
 3. **Test nested replies** by clicking "Reply" on comments
 4. **Test edit/delete restrictions** by trying to edit after 15 minutes
 5. **Check notifications** when receiving replies
+6. **Test real-time updates** by opening two browsers and posting comments/replies
 
 ## Production Deployment
 
