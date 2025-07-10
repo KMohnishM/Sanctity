@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(JSON.parse(userData));
         // Connect socket if user exists
         const parsedUser = JSON.parse(userData);
-        const s = io('http://localhost:3000', {
+        const s = io('http://13.233.216.163:3000', {
           query: { userId: parsedUser.id },
         });
         setSocket(s);
@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('token', response.accessToken);
       localStorage.setItem('user', JSON.stringify(response.user));
       // Connect socket on login
-      const s = io('http://localhost:3000', {
+      const s = io('http://13.233.216.163:3000', {
         query: { userId: response.user.id },
       });
       setSocket(s);
@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('token', response.accessToken);
       localStorage.setItem('user', JSON.stringify(response.user));
       // Connect socket on register
-      const s = io('http://localhost:3000', {
+      const s = io('http://13.233.216.163:3000', {
         query: { userId: response.user.id },
       });
       setSocket(s);
