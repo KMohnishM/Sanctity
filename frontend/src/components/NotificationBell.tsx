@@ -3,7 +3,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
-import { BellIcon } from '@heroicons/react/24/outline';
 
 interface Notification {
   id: string;
@@ -69,7 +68,7 @@ export default function NotificationBell() {
         className="relative p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
         aria-label="Notifications"
       >
-        <BellIcon className="w-6 h-6 text-gray-700" />
+        <span className="text-2xl text-gray-700">🔔</span>
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full px-1.5 text-xs font-semibold border-2 border-white shadow">
             {unreadCount}
