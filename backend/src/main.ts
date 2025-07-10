@@ -34,13 +34,13 @@ async function bootstrap() {
 
   // Log CORS config for verification
   console.log('CORS config loaded:', {
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://13.233.216.163:3001'],
     credentials: true,
   });
 
   // Enable CORS
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://13.233.216.163:3001'],
     credentials: true,
   });
 
