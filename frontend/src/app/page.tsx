@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Comment, api, canRestoreComment } from '@/lib/api';
-import { formatDistanceToNow } from 'date-fns';
 
 export default function HomePage() {
   const { user, logout, loading, socket } = useAuth();
@@ -98,6 +97,10 @@ export default function HomePage() {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString();
+  };
+
   const renderComment = (comment: Comment, depth = 0) => (
     <div
       key={comment.id}
@@ -115,7 +118,7 @@ export default function HomePage() {
         <div className="flex-1">
           <div className="flex items-center space-x-2">
             <span className="font-semibold text-gray-900">{comment.username}</span>
-            <span className="text-xs text-gray-400">{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</span>
+            <span className="text-xs text-gray-400">{formatDate(comment.createdAt)}</span>
             {comment.isDeleted && <span className="ml-2 text-xs text-red-400">[Deleted]</span>}
           </div>
           {!comment.isDeleted ? (
