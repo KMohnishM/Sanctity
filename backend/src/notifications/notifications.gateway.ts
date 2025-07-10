@@ -43,4 +43,9 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
       });
     }
   }
+
+  // Broadcast a new comment event to all users
+  broadcastNewComment(comment: any) {
+    this.server.emit('comment:new', comment);
+  }
 } 

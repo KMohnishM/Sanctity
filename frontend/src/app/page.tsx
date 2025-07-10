@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Comment, api, canRestoreComment } from '@/lib/api';
 
 export default function HomePage() {
-  const { user, logout, loading } = useAuth();
+  const { user, logout, loading, socket } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -19,6 +19,15 @@ export default function HomePage() {
       loadComments();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!socket) return;
+    const handler = () => {
+      loadComments();
+    };
+    socket.on('comment:new', handler);
+    return () => { socket.off('comment:new', handler); };
+  }, [socket]);
 
   const loadComments = async () => {
     try {

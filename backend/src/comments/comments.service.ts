@@ -59,6 +59,16 @@ export class CommentsService {
 
     const savedComment = await this.commentRepository.save(comment);
 
+    // Emit real-time comment event to all users
+    this.notificationsGateway.broadcastNewComment({
+      id: savedComment.id,
+      content: savedComment.content,
+      parentId: savedComment.parentId,
+      userId: savedComment.userId,
+      createdAt: savedComment.createdAt,
+      updatedAt: savedComment.updatedAt,
+    });
+
     // Create notification for parent comment author if this is a reply
     if (parentId) {
       const parentComment = await this.commentRepository.findOne({
