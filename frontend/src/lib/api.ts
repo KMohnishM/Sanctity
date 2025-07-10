@@ -64,9 +64,9 @@ class ApiService {
     const url = `${API_BASE_URL}${endpoint}`;
     console.log('API: Making request to:', url, 'with method:', options.method || 'GET');
     
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(options.headers as Record<string, string>),
     };
 
     if (this.token) {
